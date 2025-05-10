@@ -37,18 +37,16 @@
       transform: translateX(-50%) scale(1.1);
     }
 
-    #startBtn, #restartBtn {
+    #restartBtn {
       display: none;
+      background-color: orange;
+      top: 60%;
     }
 
     #startBtn {
+      display: none;
       background-color: yellow;
-      top: 50%;
-    }
-
-    #restartBtn {
-      background-color: orange;
-      top: 60%;
+      top: 55%;
     }
 
     #difficultyPage {
@@ -106,9 +104,9 @@
 <body>
   <div id="difficultyPage">
     <h2>Select Difficulty</h2>
-    <button class="difficultyBtn" onclick="selectDifficulty('easy')">Easy</button>
-    <button class="difficultyBtn" onclick="selectDifficulty('medium')">Medium</button>
-    <button class="difficultyBtn" onclick="selectDifficulty('hard')">Hard</button>
+    <button class="difficultyBtn" onclick="prepareStart('easy')">Easy</button>
+    <button class="difficultyBtn" onclick="prepareStart('medium')">Medium</button>
+    <button class="difficultyBtn" onclick="prepareStart('hard')">Hard</button>
   </div>
 
   <button id="startBtn" class="btn" onclick="startGame()">Start</button>
@@ -140,7 +138,7 @@
     let leftPressed = false;
     let rightPressed = false;
 
-    function selectDifficulty(level) {
+    function prepareStart(level) {
       difficulty = level;
       switch (level) {
         case "easy": speed = 2; spawnRate = 1200; break;
@@ -237,4 +235,3 @@
   </script>
 </body>
 </html>
-
