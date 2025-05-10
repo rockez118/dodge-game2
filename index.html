@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dodge the Missiles</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #111, #333);
+      font-family: Arial, sans-serif;
+    }
+
+    canvas {
+      display: block;
+      background-color: #000;
+    }
+
+    .btn {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: black;
+      box-shadow: 0 0 10px #fff;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      box-shadow: 0 0 15px yellow;
+      transform: translateX(-50%) scale(1.1);
+    }
+
+    #startBtn {
+      background-color: yellow;
+      top: 40%;
+    }
+
+    #restartBtn {
+      background-color: orange;
+      top: 55%;
+      display: none;
+    }
+
+    .difficulty {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+    }
+
+    .difficulty button {
+      margin: 4px;
+      padding: 8px;
+      border-radius: 5px;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="difficulty">
+    <button onclick="setDifficulty('easy')">Easy</button>
+    <button onclick="setDifficulty('medium')">Medium</button>
+    <button onclick="setDifficulty('hard')">Hard</button>
+  </div>
+  <button id="startBtn" class="btn" onclick="startGame()">Start</button>
+  <button id="restartBtn" class="btn" onclick="restartGame()">Restart</button>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let player = { x: 200, y: 550, width: 30, height: 30 };
+    let missiles = [];
+    let keys = {};
+    let speed = 2;
+    let missileInterval;
+    let animationId;
+    let isGameOver = false;
+    let difficulty = "medium";
+
+    function setDifficulty(level) {
+      difficulty = level;
+      switch (level) {
+        case "easy": speed = 2; break;
+        case "medium": speed = 4; break;
+        case "hard": speed = 6; break;
+      }
+    }
+
+    function drawPlayer() {
+      ctx.fillStyle = "white";
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    function drawMissile(missile) {
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.moveTo(missile.x, missile.y);
+      ctx.lineTo(missile.x + 10, missile.y + 20);
+      ctx.lineTo(missile.x - 10, missile.y + 20);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function spawnMissile() {
+      let x = Math.random() * (canvas.width - 20) + 10;
+      missiles.push({ x: x, y: -20 });
+    }
+
+    function updateGame() {
+      if (isGameOver) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (keys["ArrowLeft"] && player.x > 0) player.x -= 5;
+      if (keys["ArrowRight"] && player.x + player.width < canvas.width) player.x += 5;
+
+      drawPlayer();
+
+      missiles.forEach((missile, index) => {
+        missile.y += speed;
+        drawMissile(missile);
+
+        if (
+          missile.x > player.x &&
+          missile.x < player.x + player.width &&
+          missile.y + 20 > player.y &&
+          missile.y < player.y + player.height
+        ) {
+          endGame();
+        }
+
+        if (missile.y > canvas.height) {
+          missiles.splice(index, 1);
+        }
+      });
+
+      animationId = requestAnimationFrame(updateGame);
+    }
+
+    function startGame() {
+      document.getElementById("startBtn").style.display = "none";
+      document.getElementById("restartBtn").style.display = "none";
+      player.x = 200;
+      missiles = [];
+      isGameOver = false;
+      missileInterval = setInterval(spawnMissile, 800);
+      updateGame();
+    }
+
+    function restartGame() {
+      clearInterval(missileInterval);
+      cancelAnimationFrame(animationId);
+      startGame();
+    }
+
+    function endGame() {
+      isGameOver = true;
+      cancelAnimationFrame(animationId);
+      clearInterval(missileInterval);
+      document.getElementById("restartBtn").style.display = "block";
+    }
+
+    window.addEventListener("keydown", e => (keys[e.key] = true));
+    window.addEventListener("keyup", e => (keys[e.key] = false));
+  </script>
+</body>
+</html>
