@@ -1,247 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dodge the Falling Blocks</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dodge the Missiles</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
-    canvas { display: block; margin: 0 auto; background: #222; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #111, #333);
+      font-family: Arial, sans-serif;
+    }
 
-    #startBtn, #restartBtn, #easyBtn, #mediumBtn, #hardBtn, #veryEasyBtn {
+    canvas {
+      display: block;
+      background-color: #000;
+    }
+
+    .btn {
       position: absolute;
-      width: 200px;
-      height: 50px;
-      background-color: yellow;
-      border: none;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
       font-size: 18px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      text-align: center;
-      line-height: 50px;
-      transition: background-color 0.3s ease;
+      color: black;
+      box-shadow: 0 0 10px #fff;
+      transition: all 0.2s ease;
+      z-index: 2;
     }
-    #startBtn:hover, #restartBtn:hover, #easyBtn:hover, #mediumBtn:hover, #hardBtn:hover, #veryEasyBtn:hover {
-      background-color: #ffcc00;
-    }
-    #startBtn { top: 50%; left: 50%; transform: translate(-50%, -150%); }
-    #restartBtn { top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; }
-    #easyBtn { top: 40%; left: 50%; transform: translateX(-50%); }
-    #mediumBtn { top: 45%; left: 50%; transform: translateX(-50%); }
-    #hardBtn { top: 50%; left: 50%; transform: translateX(-50%); }
-    #veryEasyBtn { top: 35%; left: 50%; transform: translateX(-50%); }
 
-    /* Mobile Controls - initially hidden */
-    #mobileControls {
+    .btn:hover {
+      box-shadow: 0 0 15px yellow;
+      transform: translateX(-50%) scale(1.1);
+    }
+
+    #restartBtn {
       display: none;
+      background-color: orange;
+      top: 60%;
     }
 
-    @media (max-width: 600px) {
-      #mobileControls {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 20px;
-        display: flex;
-        justify-content: center;
-        gap: 30px;
-        z-index: 10;
-      }
+    #startBtn {
+      display: none;
+      background-color: yellow;
+      top: 55%;
+    }
 
-      #leftBtn, #rightBtn {
-        width: 60px;
-        height: 60px;
-        font-size: 28px;
-        background-color: rgba(255, 255, 0, 0.95);
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-      }
+    #difficultyPage {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 2;
+    }
+
+    .difficultyBtn {
+      margin: 10px;
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 40px;
+      z-index: 2;
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.8);
+      border: none;
+      border-radius: 10px;
+      padding: 15px 25px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .control-btn:active {
+      background: yellow;
+    }
+
+    #scoreBoard {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      color: white;
+      font-weight: bold;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
-<canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div id="difficultyPage">
+    <h2>Select Difficulty</h2>
+    <button class="difficultyBtn" onclick="prepareStart('easy')">Easy</button>
+    <button class="difficultyBtn" onclick="prepareStart('medium')">Medium</button>
+    <button class="difficultyBtn" onclick="prepareStart('hard')">Hard</button>
+  </div>
 
-<button id="startBtn">Start Game</button>
-<button id="restartBtn">Restart Game</button>
-<button id="easyBtn">Easy Mode</button>
-<button id="mediumBtn">Medium Mode</button>
-<button id="hardBtn">Hard Mode</button>
-<button id="veryEasyBtn">Very Easy Mode</button>
+  <button id="startBtn" class="btn" onclick="startGame()">Start</button>
+  <button id="restartBtn" class="btn" onclick="restartGame()">Restart</button>
 
-<!-- Mobile Controls -->
-<div id="mobileControls">
-  <button id="leftBtn">◀️</button>
-  <button id="rightBtn">▶️</button>
-</div>
+  <div class="controls">
+    <button class="control-btn" onmousedown="leftPressed=true" onmouseup="leftPressed=false" ontouchstart="leftPressed=true" ontouchend="leftPressed=false">◀️</button>
+    <button class="control-btn" onmousedown="rightPressed=true" onmouseup="rightPressed=false" ontouchstart="rightPressed=true" ontouchend="rightPressed=false">▶️</button>
+  </div>
 
-<script>
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-  const startBtn = document.getElementById('startBtn');
-  const restartBtn = document.getElementById('restartBtn');
-  const easyBtn = document.getElementById('easyBtn');
-  const mediumBtn = document.getElementById('mediumBtn');
-  const hardBtn = document.getElementById('hardBtn');
-  const veryEasyBtn = document.getElementById('veryEasyBtn');
-  const mobileControls = document.getElementById('mobileControls');
-  const leftBtn = document.getElementById('leftBtn');
-  const rightBtn = document.getElementById('rightBtn');
+  <div id="scoreBoard">Score: 0</div>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
 
-  let player = {
-    x: 180,
-    y: 550,
-    width: 40,
-    height: 40,
-    speed: 5,
-    color: '#0f0'
-  };
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-  let blocks = [];
-  let gameOver = false;
-  let score = 0;
-  let difficulty = 'medium';
-  let keys = {};
+    let player = { x: 200, y: 550, width: 30, height: 30 };
+    let missiles = [];
+    let keys = {};
+    let speed = 4;
+    let spawnRate = 800;
+    let missileInterval;
+    let animationId;
+    let isGameOver = false;
+    let difficulty = "medium";
+    let score = 0;
 
-  document.addEventListener('keydown', e => keys[e.key] = true);
-  document.addEventListener('keyup', e => keys[e.key] = false);
+    let leftPressed = false;
+    let rightPressed = false;
 
-  function startGame(diff) {
-    difficulty = diff;
-    gameOver = false;
-    score = 0;
-    player.x = 180;
-    player.y = 550;
-    blocks = generateBlocks(difficulty);
-    loop();
-
-    // Hide menus
-    startBtn.style.display = 'none';
-    easyBtn.style.display = 'none';
-    mediumBtn.style.display = 'none';
-    hardBtn.style.display = 'none';
-    veryEasyBtn.style.display = 'none';
-    restartBtn.style.display = 'none';
-
-    // Show mobile controls only if on mobile
-    if (window.innerWidth <= 600) {
-      mobileControls.style.display = 'flex';
-    }
-  }
-
-  function generateBlocks(difficulty) {
-    let numBlocks, speed;
-    if (difficulty === 'easy') {
-      numBlocks = 3;
-      speed = 2;
-    } else if (difficulty === 'medium') {
-      numBlocks = 5;
-      speed = 4;
-    } else if (difficulty === 'hard') {
-      numBlocks = 7;
-      speed = 6;
-    } else {
-      numBlocks = 2;
-      speed = 1;
+    function prepareStart(level) {
+      difficulty = level;
+      switch (level) {
+        case "easy": speed = 2; spawnRate = 1200; break;
+        case "medium": speed = 4; spawnRate = 800; break;
+        case "hard": speed = 6; spawnRate = 500; break;
+      }
+      document.getElementById("difficultyPage").style.display = "none";
+      document.getElementById("startBtn").style.display = "block";
     }
 
-    return Array.from({ length: numBlocks }, () => ({
-      x: Math.random() * (canvas.width - 40),
-      y: Math.random() * -600,
-      size: 40,
-      speed: speed
-    }));
-  }
+    function drawPlayer() {
+      ctx.fillStyle = "white";
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
 
-  function drawPlayer() {
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-  }
-
-  function drawBlocks() {
-    ctx.fillStyle = '#f00';
-    blocks.forEach(block => {
+    function drawMissile(missile) {
+      ctx.fillStyle = "red";
       ctx.beginPath();
-      ctx.moveTo(block.x, block.y);
-      ctx.lineTo(block.x + block.size, block.y);
-      ctx.lineTo(block.x + block.size / 2, block.y + block.size);
+      ctx.moveTo(missile.x, missile.y);
+      ctx.lineTo(missile.x + 10, missile.y + 20);
+      ctx.lineTo(missile.x - 10, missile.y + 20);
       ctx.closePath();
       ctx.fill();
-    });
-  }
+    }
 
-  function updateBlocks() {
-    for (let block of blocks) {
-      block.y += block.speed;
-      if (block.y > canvas.height) {
-        block.y = -block.size;
-        block.x = Math.random() * (canvas.width - block.size);
-        score++;
-      }
-
-      if (
-        player.x < block.x + block.size &&
-        player.x + player.width > block.x &&
-        player.y < block.y + block.size &&
-        player.y + player.height > block.y
-      ) {
-        gameOver = true;
+    function spawnMissile() {
+      let count = difficulty === "hard" ? 6 : difficulty === "medium" ? 4 : 2;
+      for (let i = 0; i < count; i++) {
+        let x = Math.random() * (canvas.width - 20) + 10;
+        missiles.push({ x: x, y: -Math.random() * 200 });
       }
     }
-  }
 
-  function updatePlayer() {
-    if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
-    if (keys['ArrowRight'] && player.x < canvas.width - player.width) player.x += player.speed;
-  }
+    function updateGame() {
+      if (isGameOver) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  function drawScore() {
-    ctx.fillStyle = '#fff';
-    ctx.font = '20px sans-serif';
-    ctx.fillText('Score: ' + score, 10, 30);
-  }
+      score += 1;
+      document.getElementById("scoreBoard").innerText = "Score: " + score;
 
-  function loop() {
-    if (gameOver) {
-      ctx.fillStyle = '#fff';
-      ctx.font = '30px sans-serif';
-      ctx.fillText('Game Over!', 120, 300);
-      ctx.fillText('Score: ' + score, 140, 340);
-      restartBtn.style.display = 'inline-block';
-      mobileControls.style.display = 'none'; // hide on game over
-      return;
+      if ((keys["ArrowLeft"] || leftPressed) && player.x > 0) player.x -= 5;
+      if ((keys["ArrowRight"] || rightPressed) && player.x + player.width < canvas.width) player.x += 5;
+
+      drawPlayer();
+
+      missiles.forEach((missile, index) => {
+        missile.y += speed;
+        drawMissile(missile);
+
+        if (
+          missile.x > player.x &&
+          missile.x < player.x + player.width &&
+          missile.y + 20 > player.y &&
+          missile.y < player.y + player.height
+        ) {
+          endGame();
+        }
+
+        if (missile.y > canvas.height) {
+          missiles.splice(index, 1);
+        }
+      });
+
+      animationId = requestAnimationFrame(updateGame);
     }
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    updatePlayer();
-    updateBlocks();
-    drawPlayer();
-    drawBlocks();
-    drawScore();
-
-    requestAnimationFrame(loop);
-  }
-
-  // Mobile button events
-  leftBtn.addEventListener('touchstart', () => keys['ArrowLeft'] = true);
-  leftBtn.addEventListener('touchend', () => keys['ArrowLeft'] = false);
-  rightBtn.addEventListener('touchstart', () => keys['ArrowRight'] = true);
-  rightBtn.addEventListener('touchend', () => keys['ArrowRight'] = false);
-
-  // Handle screen resize
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 600) {
-      mobileControls.style.display = 'none';
+    function startGame() {
+      document.getElementById("startBtn").style.display = "none";
+      document.getElementById("restartBtn").style.display = "none";
+      player.x = 200;
+      missiles = [];
+      isGameOver = false;
+      score = 0;
+      document.getElementById("scoreBoard").innerText = "Score: 0";
+      missileInterval = setInterval(spawnMissile, spawnRate);
+      updateGame();
     }
-  });
 
-  // Button clicks
-  startBtn.addEventListener('click', () => startGame('medium'));
-  easyBtn.addEventListener('click', () => startGame('easy'));
-  mediumBtn.addEventListener('click', () => startGame('medium'));
-  hardBtn.addEventListener('click', () => startGame('hard'));
-  veryEasyBtn.addEventListener('click', () => startGame('veryEasy'));
-  restartBtn.addEventListener('click', () => startGame(difficulty));
-</script>
+    function restartGame() {
+      clearInterval(missileInterval);
+      cancelAnimationFrame(animationId);
+      startGame();
+    }
+
+    function endGame() {
+      isGameOver = true;
+      cancelAnimationFrame(animationId);
+      clearInterval(missileInterval);
+      document.getElementById("restartBtn").style.display = "block";
+    }
+
+    window.addEventListener("keydown", e => (keys[e.key] = true));
+    window.addEventListener("keyup", e => (keys[e.key] = false));
+  </script>
 </body>
 </html>
+
