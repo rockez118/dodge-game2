@@ -36,6 +36,10 @@
       transform: translateX(-50%) scale(1.1);
     }
 
+    #startBtn, #restartBtn {
+      display: none;
+    }
+
     #startBtn {
       background-color: yellow;
       top: 40%;
@@ -44,23 +48,23 @@
     #restartBtn {
       background-color: orange;
       top: 55%;
-      display: none;
     }
 
-    .difficulty {
+    #difficultyPage {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 10;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
     }
 
-    .difficulty button {
-      margin: 4px;
-      padding: 8px;
-      border-radius: 5px;
-      font-size: 14px;
-      border: none;
+    .difficultyBtn {
+      margin: 10px;
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 6px;
       cursor: pointer;
+      border: none;
     }
 
     .controls {
@@ -88,11 +92,13 @@
   </style>
 </head>
 <body>
-  <div class="difficulty">
-    <button onclick="setDifficulty('easy')">Easy</button>
-    <button onclick="setDifficulty('medium')">Medium</button>
-    <button onclick="setDifficulty('hard')">Hard</button>
+  <div id="difficultyPage">
+    <h2>Select Difficulty</h2>
+    <button class="difficultyBtn" onclick="selectDifficulty('easy')">Easy</button>
+    <button class="difficultyBtn" onclick="selectDifficulty('medium')">Medium</button>
+    <button class="difficultyBtn" onclick="selectDifficulty('hard')">Hard</button>
   </div>
+
   <button id="startBtn" class="btn" onclick="startGame()">Start</button>
   <button id="restartBtn" class="btn" onclick="restartGame()">Restart</button>
 
@@ -110,7 +116,8 @@
     let player = { x: 200, y: 550, width: 30, height: 30 };
     let missiles = [];
     let keys = {};
-    let speed = 2;
+    let speed = 4;
+    let spawnRate = 800;
     let missileInterval;
     let animationId;
     let isGameOver = false;
@@ -119,13 +126,15 @@
     let leftPressed = false;
     let rightPressed = false;
 
-    function setDifficulty(level) {
+    function selectDifficulty(level) {
       difficulty = level;
       switch (level) {
-        case "easy": speed = 2; break;
-        case "medium": speed = 4; break;
-        case "hard": speed = 6; break;
+        case "easy": speed = 2; spawnRate = 1200; break;
+        case "medium": speed = 4; spawnRate = 800; break;
+        case "hard": speed = 6; spawnRate = 500; break;
       }
+      document.getElementById("difficultyPage").style.display = "none";
+      document.getElementById("startBtn").style.display = "block";
     }
 
     function drawPlayer() {
@@ -144,8 +153,10 @@
     }
 
     function spawnMissile() {
-      let x = Math.random() * (canvas.width - 20) + 10;
-      missiles.push({ x: x, y: -20 });
+      for (let i = 0; i < 3; i++) {
+        let x = Math.random() * (canvas.width - 20) + 10;
+        missiles.push({ x: x, y: -20 });
+      }
     }
 
     function updateGame() {
@@ -184,7 +195,7 @@
       player.x = 200;
       missiles = [];
       isGameOver = false;
-      missileInterval = setInterval(spawnMissile, 800);
+      missileInterval = setInterval(spawnMissile, spawnRate);
       updateGame();
     }
 
