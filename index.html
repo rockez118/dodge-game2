@@ -11,15 +11,10 @@
       background: url('https://i.imgur.com/w2XMn6I.jpg') no-repeat center center fixed;
       background-size: cover;
       font-family: Arial, sans-serif;
-      height: 100vh;
     }
 
     canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      display: block;
       background-color: transparent;
     }
 
@@ -124,15 +119,13 @@
   </div>
 
   <div id="scoreBoard">Score: 0</div>
-  <canvas id="gameCanvas"></canvas>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
 
-    let player = { x: canvas.width / 2 - 15, y: canvas.height - 60, width: 30, height: 30 };
+    let player = { x: 200, y: 550, width: 30, height: 30 };
     let missiles = [];
     let keys = {};
     let speed = 4;
@@ -216,8 +209,7 @@
     function startGame() {
       document.getElementById("startBtn").style.display = "none";
       document.getElementById("restartBtn").style.display = "none";
-      player.x = canvas.width / 2 - 15;
-      player.y = canvas.height - 60;
+      player.x = 200;
       missiles = [];
       isGameOver = false;
       score = 0;
@@ -244,3 +236,4 @@
   </script>
 </body>
 </html>
+
