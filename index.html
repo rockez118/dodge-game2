@@ -8,14 +8,14 @@
     body {
       margin: 0;
       overflow: hidden;
-      background: url('https://i.imgur.com/w2XMn6I.jpg') no-repeat center center fixed;
+      background: url('https://images.unsplash.com/photo-1477202402502-6c4c1b4b18d4?auto=format&fit=crop&w=800&q=80') no-repeat center center fixed;
       background-size: cover;
       font-family: Arial, sans-serif;
     }
 
     canvas {
       display: block;
-      background-color: transparent;
+      background-color: rgba(0, 0, 0, 0.7);
     }
 
     .btn {
@@ -41,18 +41,18 @@
     #restartBtn {
       display: none;
       background-color: orange;
-      top: 65%;
+      top: 60%;
     }
 
     #startBtn {
       display: none;
       background-color: yellow;
-      top: 60%;
+      top: 55%;
     }
 
     #difficultyPage {
       position: absolute;
-      top: 25%;
+      top: 30%;
       left: 50%;
       transform: translateX(-50%);
       text-align: center;
@@ -104,7 +104,7 @@
 </head>
 <body>
   <div id="difficultyPage">
-    <h2 style="color: white;">Select Difficulty</h2>
+    <h2>Select Difficulty</h2>
     <button class="difficultyBtn" onclick="selectDifficulty('easy')">Easy</button>
     <button class="difficultyBtn" onclick="selectDifficulty('medium')">Medium</button>
     <button class="difficultyBtn" onclick="selectDifficulty('hard')">Hard</button>
